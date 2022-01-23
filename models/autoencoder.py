@@ -11,13 +11,13 @@ class Autoencoder(nn.Module):
     in_size is applied at the end.
     """
 
-    def __init__(self, in_size, enc_sizes, dec_sizes) -> None:
+    def __init__(self, in_size, enc_sizes, dec_sizes, final_activation=None) -> None:
         super().__init__()
         self.enc_sizes = [in_size, *enc_sizes]
         self.dec_sizes = [enc_sizes[-1], *dec_sizes]
 
         self.encoder = Encoder(self.enc_sizes)
-        self.decoder = Decoder(self.dec_sizes, in_size)
+        self.decoder = Decoder(self.dec_sizes, in_size, final_activation)
 
     def forward(self, x):
         latent = self.encoder(x)
@@ -37,11 +37,12 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, dec_sizes, out_size) -> None:
+    def __init__(self, dec_sizes, out_size, final_actiation=None) -> None:
         super().__init__()
         self.layers = nn.Sequential(
             *[FeedforwardLayer(f_in, f_out) for f_in, f_out in zip(dec_sizes, dec_sizes[1:])])
-        self.last = FeedforwardLayer(dec_sizes[-1], out_size, activation=None)
+        self.last = FeedforwardLayer(
+            dec_sizes[-1], out_size, activation=final_actiation)
 
     def forward(self, x):
         x = self.layers(x)
@@ -51,7 +52,9 @@ class Decoder(nn.Module):
 
 def FeedforwardLayer(f_in, f_out, activation="relu"):
     activations = nn.ModuleDict([
-        ["relu", nn.ReLU()]
+        ["relu", nn.ReLU()],
+        ["sigmoid", nn.Sigmoid()],
+        ["tanh", nn.Tanh()]
     ])
 
     layers = [nn.Linear(f_in, f_out), activations[activation]
