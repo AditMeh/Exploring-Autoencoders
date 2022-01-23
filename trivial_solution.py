@@ -65,11 +65,13 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
         print('Student_network, Epoch {}, Train Loss {}, Val Loss {}'.format(
             epoch, round(train_loss_epoch, 6), round(val_loss_epoch, 6)))
 
+        statsTracker.reset()
+
 
 if __name__ == "__main__":
-    batch_size = 100
-    epochs = 20
-    lr = 0.000001
+    batch_size = 32
+    epochs = 10
+    lr = 0.001
 
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
@@ -77,7 +79,8 @@ if __name__ == "__main__":
     train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
 
     autoencoder = Autoencoder(
-        784, [784], [784], final_activation="sigmoid").to(device=device)
+        784, [784], [], final_activation="sigmoid").to(device=device)
 
+    print(autoencoder)
     train(autoencoder, train_loader, val_loader,
           device, epochs, lr, batch_size)
