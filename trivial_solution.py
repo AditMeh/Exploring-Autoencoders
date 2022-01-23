@@ -13,15 +13,15 @@ from torch.nn import MSELoss
 
 from models.autoencoder import Autoencoder
 from datasets.dataloader import create_dataloaders_mnist
-from TorchUtils.training import StatsTracker
+from TorchUtils.training.StatsTracker import StatsTracker
 
 
 def compute_forward_pass(model, x, optimizer, criterion, update):
     reconstruction = model(x)
     photometric_loss = criterion(reconstruction, x)
     if update:
-        optimizer.zero_grad()
-        photometric_loss.backwards()
+        model.zero_grad()
+        photometric_loss.backward()
         optimizer.step()
     return photometric_loss
 
@@ -29,7 +29,7 @@ def compute_forward_pass(model, x, optimizer, criterion, update):
 def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     # Initialize autoencoder
 
-    optimizer = SGD(params=model.parameters(), lr=lr)
+    optimizer = Adam(params=model.parameters(), lr=lr)
     statsTracker = StatsTracker()
     criterion = MSELoss(reduction="mean")
 
@@ -67,9 +67,9 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
 
 
 if __name__ == "__main__":
-    batch_size = 32
+    batch_size = 100
     epochs = 20
-    lr = 0.01
+    lr = 0.000001
 
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
 
     autoencoder = Autoencoder(
-        784, [256, 128], [256, 784], final_activation="relu")
+        784, [784], [784], final_activation="sigmoid").to(device=device)
 
     train(autoencoder, train_loader, val_loader,
           device, epochs, lr, batch_size)
