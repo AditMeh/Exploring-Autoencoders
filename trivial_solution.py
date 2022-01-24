@@ -8,16 +8,17 @@ import torch
 import tqdm
 import torch.nn.functional as F
 from torch.optim import SGD, Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.nn import MSELoss
 
 
-from models.autoencoder import Autoencoder
+from models.autoencoder import Autoencoder, Encoder
 from datasets.dataloader import create_dataloaders_mnist
 from TorchUtils.training.StatsTracker import StatsTracker
 
 
 def compute_forward_pass(model, x, optimizer, criterion, update):
-    reconstruction = model(x)
+    latent, reconstruction = model(x)
     photometric_loss = criterion(reconstruction, x)
     if update:
         model.zero_grad()
@@ -30,8 +31,10 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     # Initialize autoencoder
 
     optimizer = Adam(params=model.parameters(), lr=lr)
+    scheduler = ReduceLROnPlateau(optimizer, 'min', factor =0.1, patience = 3, min_lr=0.00001, verbose=True)
+
     statsTracker = StatsTracker()
-    criterion = MSELoss(reduction="mean")
+    criterion = MSELoss(reduction="sum")
 
     for epoch in range(1, epochs + 1):
 
@@ -40,7 +43,6 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
             x = x.to(device=device)
             photometric_loss = compute_forward_pass(
                 model, x, optimizer, criterion, update=True)
-
             statsTracker.update_curr_losses(photometric_loss.item(), None)
 
         with torch.no_grad():
@@ -62,15 +64,17 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
 
         statsTracker.update_histories(None, val_loss_epoch, model)
 
+        scheduler.step(val_loss_epoch)
         print('Student_network, Epoch {}, Train Loss {}, Val Loss {}'.format(
             epoch, round(train_loss_epoch, 6), round(val_loss_epoch, 6)))
 
         statsTracker.reset()
 
+    return statsTracker.best_model
 
 if __name__ == "__main__":
-    batch_size = 32
-    epochs = 10
+    batch_size = 64
+    epochs = 100
     lr = 0.001
 
     device = (torch.device('cuda') if torch.cuda.is_available()
@@ -78,9 +82,12 @@ if __name__ == "__main__":
 
     train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
 
+    
     autoencoder = Autoencoder(
-        784, [784], [], final_activation="sigmoid").to(device=device)
+        784, [784], [], encoder_activation=None, final_activation=None, bias=False).to(device=device)
+    autoencoder.load_state_dict(torch.load("autoencoder.pt"))
 
     print(autoencoder)
-    train(autoencoder, train_loader, val_loader,
+    best_model = train(autoencoder, train_loader, val_loader,
           device, epochs, lr, batch_size)
+    torch.save(best_model, './autoencoder.pt')
