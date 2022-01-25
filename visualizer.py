@@ -33,7 +33,10 @@ if __name__ == "__main__":
     w1 = params[0].detach().cpu().numpy()
     w2 = params[1].detach().cpu().numpy()
 
-    weight_matmul = w1 @ w2
+    weight_matmul = w2 @ w1
 
-    plt.imshow(weight_matmul, cmap='hot', interpolation="nearest")
+    print(np.diag(weight_matmul))
+    weight_matmul = np.clip(weight_matmul, a_min = 0, a_max= None)
+
+    plt.imshow(weight_matmul, cmap="hot", interpolation="nearest")
     plt.show()
