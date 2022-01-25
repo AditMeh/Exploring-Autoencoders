@@ -1,6 +1,11 @@
 # Exploring-Autoencoders
 Learning about auto encoders and latent spaces
 
+Requirements:
+- Pytorch (torchvision)
+- matplotlib
+
+
 
 ## So far:
 
