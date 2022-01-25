@@ -10,37 +10,30 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
+
+    # Create encoder
     autoencoder = Autoencoder(
-        784, [784], [], final_activation="sigmoid").to(device=device)
+        784, [784], [], encoder_activation=None, decoder_activation=None, final_activation=None, bias=False).to(device=device)
 
     autoencoder.load_state_dict(torch.load("autoencoder.pt"))
 
-    a = torch.rand(size=torch.Size([1, 784])).to(device=device)
+    # Autoencoder architecture
+    print(autoencoder)
 
     train_loader, val_loader = create_dataloaders_mnist(batch_size=1)
 
-    a, _ = next(iter(train_loader))
-    a = a.to(device=device)
+    # Sample random datapoint
+    x, _ = next(iter(train_loader))
+    x = x.to(device=device)
 
+    _, reconstruction = autoencoder(x)
 
-    _, recon = autoencoder(a)
-    criterion = MSELoss(reduction="sum")
+    params = [param for param in autoencoder.parameters()]
 
-    # f, axarr = plt.subplots(1,2)
-    # axarr[0].imshow(torch.reshape(recon, shape= (28, 28)).detach().cpu().numpy())
-    # axarr[1].imshow(torch.reshape(a, shape= (28, 28)).detach().cpu().numpy())
-    # plt.show()
-    print(recon)
-    print(a)
+    w1 = params[0].detach().cpu().numpy()
+    w2 = params[1].detach().cpu().numpy()
 
-    #print((torch.sum(a - recon).item())**2)
-    # print(criterion(recon, a))
+    weight_matmul = w1 @ w2
 
-    params = [(name, param) for name, param in autoencoder.named_parameters()]
-    print(params)
-    print(len(params))
-    w1 = params[0][1].detach().cpu().numpy()
-    w2 = params[1][1].detach().cpu().numpy()
-    print(w1 @ w2)
-    plt.imshow(w1@w2, cmap='winter', interpolation='nearest')
+    plt.imshow(weight_matmul, cmap='hot', interpolation="nearest")
     plt.show()

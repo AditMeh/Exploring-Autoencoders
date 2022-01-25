@@ -12,13 +12,14 @@ class Autoencoder(nn.Module):
     in_size is applied at the end.
     """
 
-    def __init__(self, in_size, enc_sizes, dec_sizes, encoder_activation=None, final_activation=None, bias=True) -> None:
+    def __init__(self, in_size, enc_sizes, dec_sizes, encoder_activation=None, decoder_activation=None, final_activation=None, bias=True) -> None:
         super().__init__()
         self.enc_sizes = [in_size, *enc_sizes]
         self.dec_sizes = [enc_sizes[-1], *dec_sizes]
 
         self.encoder = Encoder(self.enc_sizes, bias, encoder_activation)
-        self.decoder = Decoder(self.dec_sizes, in_size, bias, final_activation)
+        self.decoder = Decoder(self.dec_sizes, in_size,
+                               bias, decoder_activation, final_activation)
 
     def forward(self, x):
         latent = self.encoder(x)
@@ -38,12 +39,12 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, dec_sizes, out_size, bias=True, final_activation=None) -> None:
+    def __init__(self, dec_sizes, out_size, bias=True, decoder_activation=None, final_activation=None) -> None:
         super().__init__()
         self.layers = nn.Sequential(
-            *[FeedforwardLayer(f_in, f_out, bias) for f_in, f_out in zip(dec_sizes, dec_sizes[1:])])
+            *[FeedforwardLayer(f_in, f_out, activation=decoder_activation, bias=bias) for f_in, f_out in zip(dec_sizes, dec_sizes[1:])])
         self.last = FeedforwardLayer(
-            dec_sizes[-1], out_size, activation=final_activation)
+            dec_sizes[-1], out_size, activation=final_activation, bias=bias)
 
     def forward(self, x):
         x = self.layers(x)
