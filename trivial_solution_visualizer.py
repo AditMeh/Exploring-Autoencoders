@@ -12,8 +12,8 @@ if __name__ == "__main__":
               else torch.device('cpu'))
 
     # Create encoder
-    autoencoder = Autoencoder(
-        784, [784], [], encoder_activation=None, decoder_activation=None, final_activation=None, bias=False).to(device=device)
+    autoencoder = Autoencoder(784, [784], [], encoder_activation=None,
+                              decoder_activation=None, final_activation=None, bias=False).to(device=device)
 
     autoencoder.load_state_dict(torch.load("autoencoder.pt"))
 
@@ -34,9 +34,6 @@ if __name__ == "__main__":
     w2 = params[1].detach().cpu().numpy()
 
     weight_matmul = w2 @ w1
-
-    print(np.diag(weight_matmul))
-    weight_matmul = np.clip(weight_matmul, a_min = 0, a_max= None)
 
     plt.imshow(weight_matmul, cmap="hot", interpolation="nearest")
     plt.show()

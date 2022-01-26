@@ -31,7 +31,8 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     # Initialize autoencoder
 
     optimizer = Adam(params=model.parameters(), lr=lr)
-    scheduler = ReduceLROnPlateau(optimizer, 'min', factor =0.1, patience = 3, min_lr=0.00001, verbose=True)
+    scheduler = ReduceLROnPlateau(
+        optimizer, 'min', factor=0.1, patience=3, min_lr=0.00001, verbose=True)
 
     statsTracker = StatsTracker()
     criterion = MSELoss(reduction="sum")
@@ -72,6 +73,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
 
     return statsTracker.best_model
 
+
 if __name__ == "__main__":
     batch_size = 64
     epochs = 100
@@ -82,12 +84,11 @@ if __name__ == "__main__":
 
     train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
 
-    
-    autoencoder = Autoencoder(
-        784, [784], [], encoder_activation=None, final_activation=None, bias=False).to(device=device)
+    autoencoder = Autoencoder(784, [784], [], encoder_activation=None,
+                              decoder_activation=None, final_activation=None, bias=False).to(device=device)
     autoencoder.load_state_dict(torch.load("autoencoder.pt"))
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
-          device, epochs, lr, batch_size)
+                       device, epochs, lr, batch_size)
     torch.save(best_model, './autoencoder.pt')
