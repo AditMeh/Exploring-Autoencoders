@@ -1,5 +1,5 @@
 """
-This experiment shows that a simple autoencoder can learn the trivial solution and achieve 
+This experiment shows that the overcomplete autoencoder can learn the trivial solution and achieve 
 near perfect performance.
 """
 

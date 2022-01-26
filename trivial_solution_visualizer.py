@@ -15,7 +15,7 @@ if __name__ == "__main__":
     autoencoder = Autoencoder(784, [784], [], encoder_activation=None,
                               decoder_activation=None, final_activation=None, bias=False).to(device=device)
 
-    autoencoder.load_state_dict(torch.load("autoencoder.pt"))
+    autoencoder.load_state_dict(torch.load("autoencoder_trivial.pt"))
 
     # Autoencoder architecture
     print(autoencoder)
