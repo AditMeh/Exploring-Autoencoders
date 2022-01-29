@@ -76,7 +76,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
 
 if __name__ == "__main__":
     batch_size = 32
-    epochs = 200
+    epochs = 100
     lr = 0.001
 
     device = (torch.device('cuda') if torch.cuda.is_available()
@@ -86,7 +86,6 @@ if __name__ == "__main__":
 
     autoencoder = Autoencoder(784, [512, 256], [512], encoder_activation="relu",
                               decoder_activation="relu", final_activation="sigmoid", bias=False).to(device=device)
-    # autoencoder.load_state_dict(torch.load("autoencoder.pt"))
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,

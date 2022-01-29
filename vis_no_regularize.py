@@ -11,10 +11,10 @@ if __name__ == "__main__":
               else torch.device('cpu'))
 
     # Create encoder
-    autoencoder = Autoencoder(784, [784], [], encoder_activation=None,
-                              decoder_activation=None, final_activation=None, bias=False).to(device=device)
+    autoencoder = Autoencoder(784, [512, 256], [512], encoder_activation="relu",
+                              decoder_activation="relu", final_activation="sigmoid", bias=False).to(device=device)
 
-    autoencoder.load_state_dict(torch.load("autoencoder_trivial.pt"))
+    autoencoder.load_state_dict(torch.load("no_regularize.pt"))
 
     # Autoencoder architecture
     print(autoencoder)
@@ -25,14 +25,13 @@ if __name__ == "__main__":
     x, _ = next(iter(train_loader))
     x = x.to(device=device)
 
+
+    #subplot(r,c) provide the no. of rows and columns
+    f, axarr = plt.subplots(2,1) 
+
     _, reconstruction = autoencoder(x)
+    axarr[1].imshow(torch.reshape(x, torch.Size([28, 28, 1])).detach().cpu().numpy())
+    axarr[0].imshow(torch.reshape(reconstruction, torch.Size([28, 28, 1])).detach().cpu().numpy())
 
-    params = [param for param in autoencoder.parameters()]
 
-    w1 = params[0].detach().cpu().numpy()
-    w2 = params[1].detach().cpu().numpy()
-
-    weight_matmul = w2 @ w1
-
-    plt.imshow(weight_matmul, cmap="hot", interpolation="nearest")
     plt.show()
