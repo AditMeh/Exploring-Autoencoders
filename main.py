@@ -8,6 +8,8 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'experimentFolder', type=str, help="Folder name of the experiment you want to run")
+    parser.add_argument(
+        '-v', "--visualize", help="if specified, the visualization script for the experiment will run", action="store_true")
     return parser
 
 
@@ -26,11 +28,21 @@ if __name__ == "__main__":
 
     experiment_name = os.path.split(os.path.abspath(args.experimentFolder))[-1]
 
-    mymodule = importlib.import_module(
-        '.train', '.'.join(['Experiments', experiment_name]))
+    if not args.visualize:
+        mymodule = importlib.import_module(
+            '.train', '.'.join(['Experiments', experiment_name]))
 
-    config = load_config(os.path.join(
-        os.getcwd(), args.experimentFolder, "config.json"))
+        config = load_config(os.path.join(
+            os.getcwd(), args.experimentFolder, "config.json"))
+        mymodule.run_experiment(fp=os.path.join(
+            os.getcwd(), args.experimentFolder), **config)
 
-    mymodule.run_experiment(fp=os.path.join(
-        os.getcwd(), args.experimentFolder), **config)
+    else:
+        mymodule = importlib.import_module(
+            '.visualize', '.'.join(['Experiments', experiment_name]))
+
+        config = load_config(os.path.join(
+            os.getcwd(), args.experimentFolder, "config.json"))
+
+        mymodule.visualize(fp=os.path.join(os.getcwd(
+        ), args.experimentFolder), architecture_params=config["architecture_params"])

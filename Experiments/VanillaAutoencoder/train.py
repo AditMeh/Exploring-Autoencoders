@@ -16,7 +16,7 @@ from torch.nn import MSELoss
 
 from models.autoencoder import Autoencoder, Encoder
 from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
-from TorchUtils.training.StatsTracker import StatsTracker
+from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
 def compute_forward_pass(model, x, optimizer, criterion, update):
