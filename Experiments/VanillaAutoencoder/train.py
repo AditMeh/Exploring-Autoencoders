@@ -15,7 +15,7 @@ from torch.nn import MSELoss
 
 
 from models.autoencoder import Autoencoder, Encoder
-from datasets.noiseless_dataloader import create_dataloaders_mnist
+from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
 from TorchUtils.training.StatsTracker import StatsTracker
 
 

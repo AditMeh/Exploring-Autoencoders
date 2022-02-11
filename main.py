@@ -24,9 +24,13 @@ if __name__ == "__main__":
     if not os.path.isdir(args.experimentFolder):
         raise ValueError
 
-    mymodule = importlib.import_module('.train', ''.join(
-        e for e in args.experimentFolder if e.isalnum()))
+    experiment_name = os.path.split(os.path.abspath(args.experimentFolder))[-1]
 
-    config = load_config(os.path.join(os.getcwd(), args.experimentFolder, "config.json"))
+    mymodule = importlib.import_module(
+        '.train', '.'.join(['Experiments', experiment_name]))
 
-    mymodule.run_experiment(fp=os.path.join(os.getcwd(), args.experimentFolder), **config)
+    config = load_config(os.path.join(
+        os.getcwd(), args.experimentFolder, "config.json"))
+
+    mymodule.run_experiment(fp=os.path.join(
+        os.getcwd(), args.experimentFolder), **config)
