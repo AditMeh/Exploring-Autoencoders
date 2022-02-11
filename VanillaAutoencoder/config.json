@@ -1,0 +1,16 @@
+{
+    "training_params": {
+        "batch_size": 32,
+        "epochs": 50,
+        "lr": 0.00001
+    },
+    "architecture_params": {
+        "in_size": 784,
+        "enc_sizes": [512, 256],
+        "dec_sizes": [512],
+        "encoder_activation": "relu",
+        "decoder_activation": "sigmoid",
+        "final_activation": "sigmoid",
+        "bias": false
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "training_params": {
+        "batch_size": 64,
+        "epochs": 100,
+        "lr": 0.001
+    },
+    "architecture_params": {
+        "in_size": 784,
+        "enc_sizes":  [784],
+        "dec_sizes": [],
+        "encoder_activation": null,
+        "decoder_activation": null,
+        "final_activation": null,
+        "bias": false
+    }
+}
