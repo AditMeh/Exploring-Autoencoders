@@ -1,6 +1,5 @@
 """
-This experiment shows that a simple autoencoder can learn the trivial solution and achieve 
-near perfect performance.
+This experiment is a simple vanilla autoencoder
 """
 
 import json
