@@ -10,6 +10,8 @@ def create_parser():
         'experimentFolder', type=str, help="Folder name of the experiment you want to run")
     parser.add_argument(
         '-v', "--visualize", help="if specified, the visualization script for the experiment will run", action="store_true")
+    parser.add_argument(
+        '-r', "--resume", help="If specified, the visualization/train script will resume from pretrained weights", action="store_true")
     return parser
 
 
@@ -35,7 +37,7 @@ if __name__ == "__main__":
         config = load_config(os.path.join(
             os.getcwd(), args.experimentFolder, "config.json"))
         mymodule.run_experiment(fp=os.path.join(
-            os.getcwd(), args.experimentFolder), **config)
+            os.getcwd(), args.experimentFolder), **config, resume=args.resume)
 
     else:
         mymodule = importlib.import_module(
@@ -44,5 +46,5 @@ if __name__ == "__main__":
         config = load_config(os.path.join(
             os.getcwd(), args.experimentFolder, "config.json"))
 
-        mymodule.visualize(fp=os.path.join(os.getcwd(
-        ), args.experimentFolder), architecture_params=config["architecture_params"])
+        mymodule.visualize(fp=os.path.join(os.getcwd(), args.experimentFolder),
+                           resume=args.resume, architecture_params=config["architecture_params"], )

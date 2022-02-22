@@ -11,6 +11,6 @@
         "encoder_activation": "relu",
         "decoder_activation": "sigmoid",
         "final_activation": "sigmoid",
-        "bias": false
+        "bias": true
     }
 }

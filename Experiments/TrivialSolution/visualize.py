@@ -8,15 +8,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visualize(fp, architecture_params):
+def visualize(fp, architecture_params, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
 
     # Create encoder
     autoencoder = Autoencoder(**architecture_params).to(device=device)
-
-    autoencoder.load_state_dict(torch.load(
-        os.path.join(fp, "weights/autoencoder_trivial.pt")))
+    if resume:
+        autoencoder.load_state_dict(torch.load(
+            os.path.join(fp, "weights/autoencoder_trivial.pt")))
 
     # Autoencoder architecture
     print(autoencoder)

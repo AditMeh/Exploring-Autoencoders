@@ -78,7 +78,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     return statsTracker.best_model
 
 
-def run_experiment(fp, training_params, architecture_params):
+def run_experiment(fp, training_params, architecture_params, resume):
     batch_size = training_params["batch_size"]
     epochs = training_params["epochs"]
     lr = training_params["lr"]
@@ -90,8 +90,9 @@ def run_experiment(fp, training_params, architecture_params):
 
     autoencoder = Autoencoder(**(architecture_params)).to(device=device)
 
-    autoencoder.load_state_dict(torch.load(
-        os.path.join(fp, "weights/no_regularize.pt")))
+    if resume:
+        autoencoder.load_state_dict(torch.load(
+            os.path.join(fp, "weights/no_regularize.pt")))
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
