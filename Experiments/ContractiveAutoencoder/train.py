@@ -21,7 +21,6 @@ from utils.TorchUtils.training.StatsTracker import StatsTracker
 """
 The below code was adapted from 
 https://stackoverflow.com/questions/58249160/how-to-implement-contractive-autoencoder-in-pytorch
-This is a neat way to 
 """
 def compute_forward_pass(model, x, optimizer, weight, device, update):
     # Flip on the grad switches for the GT tensor

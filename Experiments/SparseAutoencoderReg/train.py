@@ -18,10 +18,22 @@ from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
-def compute_forward_pass(model, x, optimizer, weight, device, update):
-    # TODO
+def compute_forward_pass(model, x, optimizer, weight, update):
+    latent, reconstruction = model(x)
+    photometric_loss = MSELoss(reduction="sum")(reconstruction, x)
+    latent_penalty = torch.sum(torch.linalg.vector_norm(latent, ord=1, dim=1))
+    loss = (weight*latent_penalty) + photometric_loss
+    if update:
+        model.zero_grad()
+        loss.backward()
+        optimizer.step()
+    return loss
 
-    return NotImplementedError
+
+def compute_mse(model, x):
+    latent, reconstruction = model(x)
+    photometric_loss = MSELoss(reduction="sum")(reconstruction, x)
+    return photometric_loss
 
 
 def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weight):
@@ -40,15 +52,14 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weigh
         for x, _ in tqdm.tqdm(train_loader):
             x = x.to(device=device)
             photometric_loss = compute_forward_pass(
-                model, x, optimizer, weight, device, update=True)
+                model, x, optimizer, weight, update=True)
             statsTracker.update_curr_losses(photometric_loss.item(), None)
 
         with torch.no_grad():
             model.eval()
             for x, _ in tqdm.tqdm(val_loader):
                 x = x.to(device=device)
-                photometric_loss_val = compute_forward_pass(
-                    model, x, optimizer, weight, device, update=True)
+                photometric_loss_val = compute_mse(model, x)
 
                 statsTracker.update_curr_losses(
                     None, photometric_loss_val.item())
@@ -87,7 +98,7 @@ def run_experiment(fp, training_params, architecture_params, resume):
 
     if resume:
         autoencoder.load_state_dict(torch.load(
-            os.path.join(fp, "weights/sparseAeReg.pt.pt")))
+            os.path.join(fp, "weights/sparseAeReg.pt")))
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
