@@ -22,11 +22,10 @@ def ELBO(x, mu, logvar, reconstruction):
     # = -log(sigma) + 1/2 (sigma^2 + mu^2) - 1/2
 
     # Gaussian log likelihood is proportional to -ve MSE,
-    
+
     KLD_vector = -0.5*(1 + logvar - torch.exp(logvar) - torch.pow(mu, 2))
-    
-    KLD_scalar = torch.sum(torch.sum(KLD_vector, axis=1), axis = 0)
-    
+
+    KLD_scalar = torch.sum(torch.sum(KLD_vector, axis=1), axis=0)
 
     gaussian_log_likelihood = (-1) * \
         MSELoss(reduction="sum")(reconstruction, x)
@@ -71,7 +70,8 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weigh
             model.eval()
             for x, _ in tqdm.tqdm(val_loader):
                 x = x.to(device=device)
-                photometric_loss_val = compute_forward_pass(model, x)
+                photometric_loss_val = compute_forward_pass(
+                    model, x, optimizer, criterion, update=True)
 
                 statsTracker.update_curr_losses(
                     None, photometric_loss_val.item())
