@@ -13,7 +13,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.nn import MSELoss
 
 
-from models.autoencoder import Autoencoder
+from models.dense_generator import Autoencoder
 from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 

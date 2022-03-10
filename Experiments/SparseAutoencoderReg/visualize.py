@@ -1,6 +1,6 @@
 import os
 import torch
-from models.autoencoder import Autoencoder, Encoder
+from models.dense_generator import Autoencoder, Encoder
 from torch.nn import MSELoss
 from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
 import numpy as np
