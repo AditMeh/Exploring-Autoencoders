@@ -11,7 +11,7 @@
         "dec_sizes": [512],
         "z_dim": 100,
         "encoder_activation": "relu",
-        "decoder_activation": "sigmoid",
+        "decoder_activation": "relu",
         "final_activation": "sigmoid",
         "bias": true
     }

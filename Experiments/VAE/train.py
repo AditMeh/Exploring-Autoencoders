@@ -99,7 +99,6 @@ def run_experiment(fp, training_params, architecture_params, resume):
     batch_size = training_params["batch_size"]
     epochs = training_params["epochs"]
     lr = training_params["lr"]
-    weight = training_params["weight"]
 
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
