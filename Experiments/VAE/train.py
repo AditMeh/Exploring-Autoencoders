@@ -45,7 +45,7 @@ def compute_forward_pass(model, x, optimizer, criterion, update):
     return VAE_loss
 
 
-def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weight):
+def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     # Initialize autoencoder
 
     optimizer = Adam(params=model.parameters(), lr=lr)
@@ -114,5 +114,5 @@ def run_experiment(fp, training_params, architecture_params, resume):
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
-                       device, epochs, lr, batch_size, weight)
+                       device, epochs, lr, batch_size)
     torch.save(best_model, os.path.join(fp, "weights/VAE_weights.pt"))
