@@ -71,7 +71,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weigh
             for x, _ in tqdm.tqdm(val_loader):
                 x = x.to(device=device)
                 photometric_loss_val = compute_forward_pass(
-                    model, x, optimizer, criterion, update=True)
+                    model, x, optimizer, criterion, update=False)
 
                 statsTracker.update_curr_losses(
                     None, photometric_loss_val.item())
