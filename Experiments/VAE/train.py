@@ -5,6 +5,7 @@ This experiment is for the contrastive autoencoderr
 import json
 from operator import mod
 import os
+from turtle import clear
 import torch
 import tqdm
 import torch.nn.functional as F
@@ -27,11 +28,16 @@ def ELBO(x, mu, logvar, reconstruction):
 
     KLD_scalar = torch.sum(torch.sum(KLD_vector, axis=1), axis=0)
 
+    # print("m", torch.max(reconstruction), torch.min(reconstruction))
     gaussian_log_likelihood = (-1) * \
         MSELoss(reduction="sum")(reconstruction, x)
+    # print(torch.mean(MSELoss(reduction="none")(reconstruction, x)))
 
     # ELBO is defined as -KL divergence + log likelihood
     # Therefore since we want to maximize the ELBO, we equivalently need to minimize KLD - log likelihood
+
+    # print("ll", gaussian_log_likelihood)
+    #print("kld", KLD_scalar)
     return KLD_scalar - gaussian_log_likelihood
 
 
