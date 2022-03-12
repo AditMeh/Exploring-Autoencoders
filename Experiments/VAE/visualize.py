@@ -1,10 +1,12 @@
+from enum import auto
 import os
+from re import L
 import torch
 from models.dense_generator import VariationalAutoencoder
-from torch.nn import MSELoss
 from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
 import numpy as np
 import tqdm
+import imageio
 
 import matplotlib.pyplot as plt
 
@@ -35,6 +37,31 @@ def plot_samples(autoencoder, device):
             img[i*28:(i+1)*28, j*28:(j+1)*28] = reconstruction
     axarr_2.imshow(img)
 
+def generate_gif(autoencoder, device):
+    NUM_SAMPLES = 30
+    SAVE_IMAGE_W = 10
+    fill_image = np.zeros((NUM_SAMPLES ,SAVE_IMAGE_W*28, SAVE_IMAGE_W*28))
+    
+    train_iter = iter(create_dataloaders_mnist(batch_size=SAVE_IMAGE_W**2)[0])
+    x_1, x_2 = (next(train_iter)[0]).to(device), (next(train_iter)[0]).to(device)
+    z_1, _, _,_ = autoencoder(x_1)
+    z_2, _, _,_ = autoencoder(x_2)
+
+    zs = torch.stack([z_1 + (z_2 - z_1)*t for t in torch.linspace(0, 1, NUM_SAMPLES)])
+
+    for i in range(NUM_SAMPLES):
+        batch_decoded = autoencoder.decoder(zs[i]).reshape(SAVE_IMAGE_W,SAVE_IMAGE_W,28,28).detach().cpu().numpy()
+
+        for j in range(SAVE_IMAGE_W):
+            for k in range(SAVE_IMAGE_W):
+                fill_image[i, j*28:(j+1)*28, k*28:(k+1)*28] = batch_decoded[j, k, :, :]
+
+    images = (fill_image*255).astype(np.uint8)
+
+    save_images = []
+    for img in images:
+        save_images.append(img)
+    imageio.mimsave('test.gif', save_images + save_images[::-1])
 
 def visualize(fp, architecture_params, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
@@ -76,6 +103,9 @@ def visualize(fp, architecture_params, resume):
     # sample latents -> image
     # generate image comparison subplot
     plot_samples(autoencoder, device)
+
+    # Interpolation
+    generate_gif(autoencoder, device)
 
     plt.show()
 
