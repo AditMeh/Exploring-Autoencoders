@@ -45,7 +45,7 @@ I've implemented and trained contractive autoencoders and constrained AE. I won'
 
 So far, I've trained a VAE with a gaussian posterior on MNIST:
 
-Here is a visualziation. For each cell with an image, I am interpolating between two randomly sample images from the dataset:
+Here is a visualization. For each cell with an image, I am interpolating between two randomly sample images from the dataset:
 
 ![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/test.gif)
 
