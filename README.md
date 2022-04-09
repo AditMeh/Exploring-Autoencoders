@@ -37,3 +37,16 @@ Here is a clipped version ([0, inf)).
 
 
 As evidenced, it appears the network has learned an identity transformation, with W1 and W2 being inverses. 
+
+#### CAE, L1 constrainted AE:
+I've implemented and trained contractive autoencoders and constrained AE. I won't write about them in detail.
+
+### VAE
+
+So far, I've trained a VAE with a gaussian posterior on MNIST:
+
+Here is a visualziation. For each cell with an image, I am interpolating between two randomly sample images from the dataset:
+
+![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/test.gif)
+
+
