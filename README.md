@@ -17,23 +17,15 @@ I trained a neural network with no bias and activation with the following archit
 
 
 First, I trained the to achieve a near-perfect photometric loss on the validation set on MNIST, I trained for 100 epochs with LR scheduling. Once I achieved the loss I wanted,
-I then computed (W1)(W2) and (W2)(W1). Here are their heatmaps below. 
-
-(W1)(W2):
-
-![w1w2](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/w1_w2.png)
+I then computed (W2)(W1) and plotted the heatmap below. 
 
 (W2)(W1):
 
-![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/w2_w1.png)
+![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/trivialsolution.png)
 
+The second set of weights appears to have higher off-diagonal values in the visualization, I believe this is because it has very small negative values of the diagonal, so the
+visualization messes up a little bit. Therefore, I clipped the values on the right plot so we can clearly see the identity matrix.
 
-The second set of weights appears to have higher off-diagonal values in the visualziation, I believe this is because it has very small negative values of the diagonal, so the
-visualization messes up a little bit.
-
-Here is a clipped version ([0, inf)).
-
-![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/w2_w1_clipped.png)
 
 
 As evidenced, it appears the network has learned an identity transformation, with W1 and W2 being inverses. 
