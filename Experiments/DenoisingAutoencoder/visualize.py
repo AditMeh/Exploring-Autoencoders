@@ -30,10 +30,17 @@ def visualize(fp, architecture_params, resume):
     x = dropout_transform(target)
 
     # subplot(r,c) provide the no. of rows and columns
-    f, axarr = plt.subplots(2, 6, constrained_layout=True, figsize = [6,2])
+    f, axarr = plt.subplots(2, 6, constrained_layout=True, figsize = [8,2])
 
 
     for i in range(2):
+        (axarr[i, 0]).title.set_text("Original")
+        (axarr[i, 1]).title.set_text("Corrupted")
+        (axarr[i, 2]).title.set_text("Reconstructed")
+        (axarr[i, 3]).title.set_text("Original")
+        (axarr[i, 4]).title.set_text("Corrupted")
+        (axarr[i, 5]).title.set_text("Reconstructed")
+
         axarr[i, 0].imshow(torch.reshape(
             target[2*i], torch.Size([28, 28, 1])).detach().cpu().numpy())
         axarr[i, 1].imshow(torch.reshape(
