@@ -2,7 +2,7 @@ import os
 import torch
 from models.dense_generator import Autoencoder, Encoder
 from torch.nn import MSELoss
-from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
+from utils.datasets.mnist_dataloaders import create_dataloaders_mnist
 import numpy as np
 
 import matplotlib.pyplot as plt

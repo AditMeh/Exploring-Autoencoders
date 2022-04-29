@@ -14,7 +14,7 @@ from torch.nn import MSELoss
 
 
 from models.dense_generator import Autoencoder, Encoder
-from utils.datasets.noiseless_dataloader import create_dataloaders_mnist
+from utils.datasets.mnist_dataloaders import create_dataloaders_mnist
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
@@ -79,8 +79,6 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
 
 def run_experiment(fp, training_params, architecture_params, resume):
     batch_size = training_params["batch_size"]
-    epochs = training_params["epochs"]
-    lr = training_params["lr"]
 
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
@@ -95,5 +93,5 @@ def run_experiment(fp, training_params, architecture_params, resume):
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
-                       device, epochs, lr, batch_size)
+                       device, **(training_params))
     torch.save(best_model, os.path.join(fp, "weights/no_regularize.pt"))
