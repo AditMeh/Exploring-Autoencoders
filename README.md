@@ -9,7 +9,7 @@ Requirements:
 
 ## So far:
 
-#### Trivial solution for MNIST reconstruction:
+### Trivial solution for MNIST reconstruction:
 
 I trained a neural network with no bias and activation with the following architecture on the image reconstruction task:
 
@@ -30,8 +30,16 @@ visualization messes up a little bit. Therefore, I clipped the values on the rig
 
 As evidenced, it appears the network has learned an identity transformation, with W1 and W2 being inverses. 
 
-#### CAE, L1 constrainted AE:
+### CAE, L1 constrainted AE:
 I've implemented and trained contractive autoencoders and constrained AE. I won't write about them in detail.
+
+
+### Denoising autoencoder
+
+![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/denoising.png)
+
+
+I've implemented a simple demoising autoencoder on MNIST. The visualization above shows how the network has learned to reconstruct the corrupted parts of the image. For the noise, I just dropped out pixels in the image with a probability hyperparameter, basically dropout. 
 
 ### VAE
 
