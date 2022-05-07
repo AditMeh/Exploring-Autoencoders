@@ -1,16 +1,45 @@
+from tkinter import W
 import torchvision.datasets as datasets
 import torch
 from torchvision.transforms.transforms import ToTensor, Compose, Lambda
 from torch.nn.functional import dropout
 
-class DropoutPixelsTransform:
+
+class DropoutPixelsTransform(object):
     def __init__(self, prob) -> None:
         self.prob = prob
+
     def __call__(self, tensor):
-        return dropout(tensor, self.prob) # inplace dropout
+        return dropout(tensor, self.prob)  # inplace dropout
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
+
+
+class BinarizeTransform(object):
+    def __init__(self) -> None:
+        pass
+
+    def __call__(self, tensor):
+        return (~(tensor == 0)).float()
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
+
+
+class UnflattenImageTransform(object):
+    def __init__(self, height, width, channels) -> None:
+        self.height = height
+        self.width = width
+        self.channels = channels
+
+    def __call__(self, tensor):
+        batch_size = tensor.shape[0]
+        return torch.reshape(tensor, (batch_size, self.channels, self.width, self.height))
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
+
 
 def create_dataloaders_mnist(batch_size, tanh_normalize=False):
 
