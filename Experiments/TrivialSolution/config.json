@@ -12,5 +12,11 @@
         "decoder_activation": null,
         "final_activation": null,
         "bias": false
+    },
+    "dataset_params": {
+        "name": "mnist",
+        "hyperparams": {
+            "batch_size" : 32
+        }
     }
 }

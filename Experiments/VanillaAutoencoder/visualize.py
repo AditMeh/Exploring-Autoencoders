@@ -1,26 +1,26 @@
 import os
 import torch
-from models.dense_generator import Autoencoder, Encoder
-from torch.nn import MSELoss
-from utils.datasets.mnist_dataloaders import create_dataloaders_mnist
+from models.dense_generator import Autoencoder
 import numpy as np
 
 import matplotlib.pyplot as plt
 
 
-def visualize(fp, architecture_params, resume):
+def visualize(fp, architecture_params, dataloader_params, dataloader_func, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
 
     # Create encoder
     autoencoder = Autoencoder(**architecture_params).to(device=device)
     if resume:
-        autoencoder.load_state_dict(torch.load(os.path.join(fp, "weights/no_regularize.pt")))
+        autoencoder.load_state_dict(torch.load(
+            os.path.join(fp, "weights/no_regularize.pt")))
 
     # Autoencoder architecture
     print(autoencoder)
 
-    train_loader, val_loader = create_dataloaders_mnist(batch_size=4)
+    train_loader, val_loader = dataloader_func(
+        **dataloader_params["hyperparams"])
 
     # Sample random datapoint
     x, _ = next(iter(train_loader))

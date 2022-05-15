@@ -36,8 +36,12 @@ if __name__ == "__main__":
 
         config = load_config(os.path.join(
             os.getcwd(), args.experimentFolder, "config.json"))
+
+        dataset_holder = importlib.import_module(
+            ".".join(["utils", "datasets", config["dataset_params"]["name"]]))
+
         mymodule.run_experiment(fp=os.path.join(
-            os.getcwd(), args.experimentFolder), **config, resume=args.resume)
+            os.getcwd(), args.experimentFolder), **config, dataloader_func=dataset_holder.create_dataloaders, resume=args.resume)
 
     else:
         mymodule = importlib.import_module(
@@ -46,5 +50,11 @@ if __name__ == "__main__":
         config = load_config(os.path.join(
             os.getcwd(), args.experimentFolder, "config.json"))
 
+        dataset_holder = importlib.import_module(
+            ".".join(["utils", "datasets", config["dataset_params"]["name"]]))
+
         mymodule.visualize(fp=os.path.join(os.getcwd(), args.experimentFolder),
-                           resume=args.resume, architecture_params=config["architecture_params"], )
+                           resume=args.resume,
+                           architecture_params=config["architecture_params"],
+                           dataloader_params=config["dataset_params"],
+                           dataloader_func=dataset_holder.create_dataloaders)

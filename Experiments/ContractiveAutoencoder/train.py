@@ -14,7 +14,6 @@ from torch.nn import MSELoss
 
 
 from models.dense_generator import Autoencoder
-from utils.datasets.mnist_dataloaders import create_dataloaders_mnist
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
@@ -22,6 +21,8 @@ from utils.TorchUtils.training.StatsTracker import StatsTracker
 The below code was adapted from 
 https://stackoverflow.com/questions/58249160/how-to-implement-contractive-autoencoder-in-pytorch
 """
+
+
 def compute_forward_pass(model, x, optimizer, weight, device, update):
     # Flip on the grad switches for the GT tensor
     x.requires_grad_(True)
@@ -34,8 +35,9 @@ def compute_forward_pass(model, x, optimizer, weight, device, update):
     # the latent once more for the MSE term. We pass in downstream gradient of ones, because we only want a gradient
     # of dz/dx, so dot producting dy/dz set to a vector of ones with dz/dx returns just dz/dx
     latent.backward(torch.ones(latent.size()).to(device), retain_graph=True)
-    
-    loss2 = torch.sqrt(torch.sum(torch.pow(x.grad, 2))) # Comptue the frobenius norm on the gradients
+
+    # Comptue the frobenius norm on the gradients
+    loss2 = torch.sqrt(torch.sum(torch.pow(x.grad, 2)))
     x.grad.data.zero_()
     loss = reconstruction_loss + (weight*loss2)
     x.requires_grad_(False)
@@ -45,10 +47,12 @@ def compute_forward_pass(model, x, optimizer, weight, device, update):
         optimizer.step()
     return loss
 
+
 def compute_mse(model, x):
     latent, reconstruction = model(x)
     photometric_loss = MSELoss(reduction="sum")(reconstruction, x)
     return photometric_loss
+
 
 def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weight):
     # Initialize autoencoder
@@ -68,7 +72,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weigh
             photometric_loss = compute_forward_pass(
                 model, x, optimizer, weight, device, update=True)
             statsTracker.update_curr_losses(photometric_loss.item(), None)
-        
+
         with torch.no_grad():
             model.eval()
             for x, _ in tqdm.tqdm(val_loader):
@@ -97,13 +101,11 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, weigh
     return statsTracker.best_model
 
 
-def run_experiment(fp, training_params, architecture_params, resume):
-    batch_size = training_params["batch_size"]
-
+def run_experiment(fp, training_params, architecture_params, dataset_params, dataloader_func, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
 
-    train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
+    train_loader, val_loader = dataloader_func(**dataset_params["hyperparams"])
 
     autoencoder = Autoencoder(**(architecture_params)).to(device=device)
 

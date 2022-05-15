@@ -2,7 +2,7 @@
     "training_params": {
         "batch_size": 32,
         "epochs": 50,
-        "lr": 0.00001,
+        "lr": 0.001,
         "prob": 0.5
     },
     "architecture_params": {
@@ -13,5 +13,11 @@
         "decoder_activation": "sigmoid",
         "final_activation": "sigmoid",
         "bias": true
+    },
+    "dataset_params": {
+        "name": "mnist",
+        "hyperparams":{
+            "batch_size":32
+        }
     }
 }

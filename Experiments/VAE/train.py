@@ -2,20 +2,18 @@
 This experiment is for the contrastive autoencoderr
 """
 
-import json
 from operator import mod
 import os
 from turtle import clear
 import torch
 import tqdm
 import torch.nn.functional as F
-from torch.optim import SGD, Adam
+from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.nn import MSELoss
 
 
 from models.dense_generator import VariationalAutoencoder
-from utils.datasets.mnist_dataloaders import create_dataloaders_mnist
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
@@ -28,16 +26,11 @@ def ELBO(x, mu, logvar, reconstruction):
 
     KLD_scalar = torch.sum(torch.sum(KLD_vector, axis=1), axis=0)
 
-    # print("m", torch.max(reconstruction), torch.min(reconstruction))
     gaussian_log_likelihood = (-1) * \
         MSELoss(reduction="sum")(reconstruction, x)
-    # print(torch.mean(MSELoss(reduction="none")(reconstruction, x)))
 
     # ELBO is defined as -KL divergence + log likelihood
     # Therefore since we want to maximize the ELBO, we equivalently need to minimize KLD - log likelihood
-
-    # print("ll", gaussian_log_likelihood)
-    #print("kld", KLD_scalar)
     return KLD_scalar - gaussian_log_likelihood
 
 
@@ -101,13 +94,11 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     return statsTracker.best_model
 
 
-def run_experiment(fp, training_params, architecture_params, resume):
-    batch_size = training_params["batch_size"]
-
+def run_experiment(fp, training_params, architecture_params, dataset_params, dataloader_func, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
 
-    train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
+    train_loader, val_loader = dataloader_func(**dataset_params["hyperparams"])
 
     autoencoder = VariationalAutoencoder(
         **(architecture_params)).to(device=device)

@@ -2,19 +2,16 @@
 This experiment is a simple vanilla autoencoder
 """
 
-import json
-from operator import mod
 import os
 import torch
 import tqdm
 import torch.nn.functional as F
-from torch.optim import SGD, Adam
+from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.nn import MSELoss
 
 
-from models.dense_generator import Autoencoder, Encoder
-from utils.datasets.mnist_dataloaders import create_dataloaders_mnist
+from models.dense_generator import Autoencoder
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
@@ -77,13 +74,11 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     return statsTracker.best_model
 
 
-def run_experiment(fp, training_params, architecture_params, resume):
-    batch_size = training_params["batch_size"]
-
+def run_experiment(fp, training_params, architecture_params, dataset_params, dataloader_func, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
 
-    train_loader, val_loader = create_dataloaders_mnist(batch_size=batch_size)
+    train_loader, val_loader = dataloader_func(**dataset_params["hyperparams"])
 
     autoencoder = Autoencoder(**(architecture_params)).to(device=device)
 

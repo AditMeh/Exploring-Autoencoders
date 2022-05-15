@@ -2,13 +2,13 @@ import os
 import torch
 from models.dense_generator import Autoencoder, Encoder
 from torch.nn import MSELoss
-from utils.datasets.mnist_dataloaders import create_dataloaders_mnist, DropoutPixelsTransform
+from utils.datasets.mnist import DropoutPixelsTransform
 import numpy as np
 
 import matplotlib.pyplot as plt
 
 
-def visualize(fp, architecture_params, resume):
+def visualize(fp, architecture_params, dataloader_params, dataloader_func, resume):
     device = (torch.device('cuda') if torch.cuda.is_available()
               else torch.device('cpu'))
 
@@ -21,7 +21,8 @@ def visualize(fp, architecture_params, resume):
     # Autoencoder architecture
     print(autoencoder)
 
-    train_loader, val_loader = create_dataloaders_mnist(batch_size=4)
+    train_loader, val_loader = dataloader_func(
+        **dataloader_params["hyperparams"])
 
     dropout_transform = DropoutPixelsTransform(0.5)
     # Sample random datapoint
