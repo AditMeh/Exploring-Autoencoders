@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class VariationalAutoencoder(nn.Module):
     """
     in_size: Size of input, must be a (B, in_size shape)
@@ -11,19 +12,19 @@ class VariationalAutoencoder(nn.Module):
     in_size is applied at the end.
     """
 
-    def __init__(self, in_size, enc_sizes, dec_sizes, z_dim, 
-    encoder_activation=None, decoder_activation=None, final_activation=None, bias=True) -> None:
+    def __init__(self, in_size, enc_sizes, dec_sizes, z_dim,
+                 encoder_activation=None, decoder_activation=None, final_activation=None, bias=True) -> None:
         super().__init__()
         self.enc_sizes = [in_size, *enc_sizes]
         self.dec_sizes = [z_dim, *dec_sizes]
 
-        self.encoder = Encoder(self.enc_sizes, bias, encoder_activation)
+        self.encoder = DenseEncoder(self.enc_sizes, bias, encoder_activation)
 
         self.mean_encoder = nn.Linear(enc_sizes[-1], z_dim)
         self.variance_encoder = nn.Linear(enc_sizes[-1], z_dim)
 
-        self.decoder = Decoder(self.dec_sizes, in_size,
-                               bias, decoder_activation, final_activation)
+        self.decoder = DenseDecoder(self.dec_sizes, in_size,
+                                    bias, decoder_activation, final_activation)
 
     def reparameterize(self, mean, logvar):
         std = torch.exp(0.5 * logvar)
@@ -38,10 +39,9 @@ class VariationalAutoencoder(nn.Module):
         z = self.reparameterize(mean, logvar)
         reconstruction = self.decoder(z)
         return z, mean, logvar, reconstruction
-    
 
 
-class Autoencoder(nn.Module):
+class DenseAutoEncoder(nn.Module):
     """
     in_size: Size of input, must be a (B, in_size shape)
     enc_sizes: List of hidden layer sizes for the encoder, final value is the latent space size
@@ -54,9 +54,9 @@ class Autoencoder(nn.Module):
         self.enc_sizes = [in_size, *enc_sizes]
         self.dec_sizes = [enc_sizes[-1], *dec_sizes]
 
-        self.encoder = Encoder(self.enc_sizes, bias, encoder_activation)
-        self.decoder = Decoder(self.dec_sizes, in_size,
-                               bias, decoder_activation, final_activation)
+        self.encoder = DenseEncoder(self.enc_sizes, bias, encoder_activation)
+        self.decoder = DenseDecoder(self.dec_sizes, in_size,
+                                    bias, decoder_activation, final_activation)
 
     def forward(self, x):
         latent = self.encoder(x)
@@ -64,7 +64,7 @@ class Autoencoder(nn.Module):
         return latent, reconstruction
 
 
-class Encoder(nn.Module):
+class DenseEncoder(nn.Module):
     def __init__(self, enc_sizes, bias=True, activation=None) -> None:
         super().__init__()
         self.layers = nn.Sequential(
@@ -75,7 +75,7 @@ class Encoder(nn.Module):
         return x
 
 
-class Decoder(nn.Module):
+class DenseDecoder(nn.Module):
     def __init__(self, dec_sizes, out_size, bias=True, decoder_activation=None, final_activation=None) -> None:
         super().__init__()
         self.layers = nn.Sequential(

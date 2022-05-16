@@ -1,6 +1,6 @@
 import os
 import torch
-from models.dense_generator import Autoencoder, Encoder
+from models.dense_generator import DenseAutoEncoder, DenseEncoder
 from torch.nn import MSELoss
 import numpy as np
 
@@ -12,16 +12,17 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
               else torch.device('cpu'))
 
     # Create encoder
-    autoencoder = Autoencoder(**architecture_params).to(device=device)
+    autoencoder = DenseAutoEncoder(**architecture_params).to(device=device)
     if resume:
-        autoencoder.load_state_dict(torch.load(os.path.join(fp, "weights/sparseAeReg.pt")))
+        autoencoder.load_state_dict(torch.load(
+            os.path.join(fp, "weights/sparseAeReg.pt")))
 
     # Autoencoder architecture
     print(autoencoder)
 
     train_loader, val_loader = dataloader_func(
         **dataloader_params["hyperparams"])
-        
+
     # Sample random datapoint
     x, _ = next(iter(train_loader))
     x = x.to(device=device)

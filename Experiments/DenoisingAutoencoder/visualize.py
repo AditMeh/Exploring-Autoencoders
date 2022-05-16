@@ -1,6 +1,6 @@
 import os
 import torch
-from models.dense_generator import Autoencoder, Encoder
+from models.dense_generator import DenseAutoEncoder, DenseEncoder
 from torch.nn import MSELoss
 from utils.datasets.mnist import DropoutPixelsTransform
 import numpy as np
@@ -13,7 +13,7 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
               else torch.device('cpu'))
 
     # Create encoder
-    autoencoder = Autoencoder(**architecture_params).to(device=device)
+    autoencoder = DenseAutoEncoder(**architecture_params).to(device=device)
     if resume:
         autoencoder.load_state_dict(torch.load(
             os.path.join(fp, "weights/denoisingae.pt")))
@@ -31,8 +31,7 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
     x = dropout_transform(target)
 
     # subplot(r,c) provide the no. of rows and columns
-    f, axarr = plt.subplots(2, 6, constrained_layout=True, figsize = [8,2])
-
+    f, axarr = plt.subplots(2, 6, constrained_layout=True, figsize=[8, 2])
 
     for i in range(2):
         (axarr[i, 0]).title.set_text("Original")
@@ -56,7 +55,6 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
         axarr[i, 5].imshow(torch.reshape(autoencoder(
             x[2*i + 1])[1], torch.Size([28, 28, 1])).detach().cpu().numpy())
 
-    
     for i in range(2):
         for j in range(6):
             (axarr[i, j]).set_xticks([])

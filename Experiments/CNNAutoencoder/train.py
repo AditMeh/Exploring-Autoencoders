@@ -1,25 +1,24 @@
 """
-This experiment is a denoising autoencoder
+This experiment is a simple vanilla autoencoder
 """
 
-import json
 import os
 import torch
 import tqdm
 import torch.nn.functional as F
-from torch.optim import SGD, Adam
+from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.nn import MSELoss
 
 
-from models.dense_generator import DenseAutoEncoder, DenseEncoder
-from utils.datasets.mnist import DropoutPixelsTransform
+from models.cnn_generator import CNNAutoencoder
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
-def compute_forward_pass(model, x, target, optimizer, criterion, update):
+def compute_forward_pass(model, x, optimizer, criterion, update):
     latent, reconstruction = model(x)
-    photometric_loss = criterion(reconstruction, target)
+
+    photometric_loss = criterion(reconstruction, x)
     if update:
         model.zero_grad()
         photometric_loss.backward()
@@ -27,9 +26,9 @@ def compute_forward_pass(model, x, target, optimizer, criterion, update):
     return photometric_loss
 
 
-def train(model, train_loader, val_loader, device, epochs, lr, batch_size, prob=0.5):
+def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
     # Initialize autoencoder
-    print(prob)
+
     optimizer = Adam(params=model.parameters(), lr=lr)
     scheduler = ReduceLROnPlateau(
         optimizer, 'min', factor=0.1, patience=3, min_lr=0.00001, verbose=True)
@@ -37,7 +36,6 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, prob=
     statsTracker = StatsTracker(
         batch_size * len(train_loader), batch_size * len(val_loader))
     criterion = MSELoss(reduction="sum")
-    dropout_transform = DropoutPixelsTransform(prob)
 
     for epoch in range(1, epochs + 1):
 
@@ -45,7 +43,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, prob=
         for x, _ in tqdm.tqdm(train_loader):
             x = x.to(device=device)
             photometric_loss = compute_forward_pass(
-                model, dropout_transform(x), x, optimizer, criterion, update=True)
+                model, x, optimizer, criterion, update=True)
             statsTracker.update_curr_losses(photometric_loss.item(), None)
 
         with torch.no_grad():
@@ -53,7 +51,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size, prob=
             for x, _ in tqdm.tqdm(val_loader):
                 x = x.to(device=device)
                 photometric_loss_val = compute_forward_pass(
-                    model, dropout_transform(x), x, optimizer, criterion, update=False)
+                    model, x, optimizer, criterion, update=False)
 
                 statsTracker.update_curr_losses(
                     None, photometric_loss_val.item())
@@ -83,13 +81,13 @@ def run_experiment(fp, training_params, architecture_params, dataset_params, dat
 
     train_loader, val_loader = dataloader_func(**dataset_params["hyperparams"])
 
-    autoencoder = DenseAutoEncoder(**(architecture_params)).to(device=device)
+    autoencoder = CNNAutoencoder(**(architecture_params)).to(device=device)
 
     if resume:
         autoencoder.load_state_dict(torch.load(
-            os.path.join(fp, "weights/denoisingae.pt")))
+            os.path.join(fp, "weights/cnn_ae.pt")))
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
                        device, **(training_params))
-    torch.save(best_model, os.path.join(fp, "weights/denoisingae.pt"))
+    torch.save(best_model, os.path.join(fp, "weights/cnn_ae.pt"))

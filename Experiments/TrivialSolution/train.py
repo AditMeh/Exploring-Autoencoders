@@ -13,7 +13,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.nn import MSELoss
 
 
-from models.dense_generator import Autoencoder, Encoder
+from models.dense_generator import DenseAutoEncoder, DenseEncoder
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
 
@@ -78,7 +78,7 @@ def run_experiment(fp, training_params, architecture_params, dataset_params, dat
 
     train_loader, val_loader = dataloader_func(**dataset_params["hyperparams"])
 
-    autoencoder = Autoencoder(**(architecture_params)).to(device=device)
+    autoencoder = DenseAutoEncoder(**(architecture_params)).to(device=device)
     if resume:
         autoencoder.load_state_dict(torch.load(
             os.path.join(fp, "weights/autoencoder_trivial.pt")))

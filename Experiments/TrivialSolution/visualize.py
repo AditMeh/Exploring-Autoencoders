@@ -1,6 +1,6 @@
 import os
 import torch
-from models.dense_generator import Autoencoder, Encoder
+from models.dense_generator import DenseAutoEncoder, DenseEncoder
 from torch.nn import MSELoss
 import numpy as np
 
@@ -15,7 +15,7 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
     f.set_size_inches(7, 3)
 
     # Create encoder
-    autoencoder = Autoencoder(**architecture_params).to(device=device)
+    autoencoder = DenseAutoEncoder(**architecture_params).to(device=device)
     if resume:
         autoencoder.load_state_dict(torch.load(
             os.path.join(fp, "weights/autoencoder_trivial.pt")))

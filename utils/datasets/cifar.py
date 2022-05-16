@@ -22,15 +22,14 @@ class CIFARDataset(torch.utils.data.Dataset):
 
         base_path = "data/cifar10"
         for c in classes:
-            self.images += [(pth, c)
+            self.images += [(os.path.join(base_path, subfolder, c, pth), c)
                             for pth in os.listdir(os.path.join(base_path, subfolder, c))]
-
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-        im = Image.open(os.path.join("data", self.images[idx][0]))
-        return F.pil_to_tensor(im), self.images[idx][1]
+        im = Image.open(self.images[idx][0])
+        return transforms.ToTensor()(im), self.images[idx][1]
 
 
 def get_pytorch_dataloaders():
@@ -74,24 +73,23 @@ def save_dataset(trainloader, testloader):
             image.save(os.path.join(pth, str(counter_set[cls]) + ".png"))
 
 
-def create_dataloaders(config):
+def create_dataloaders(batch_size, classes):
     if not os.path.exists(os.path.join("data", "cifar10")):
         trainloader, testloader = get_pytorch_dataloaders()
         save_dataset(trainloader, testloader)
     # insert logic for creating the dataloaders
     train = torch.utils.data.DataLoader(
         CIFARDataset("cifar_10_segmented_train",
-                        classes=config["classes"]),
-        batch_size=config["batch_size"], shuffle=True)
+                        classes=classes),
+        batch_size=batch_size, shuffle=True)
 
     test = torch.utils.data.DataLoader(
         CIFARDataset("cifar_10_segmented_test",
-                        classes=config["classes"]),
-        batch_size=config["batch_size"], shuffle=True)
+                        classes=classes),
+        batch_size=batch_size, shuffle=True)
     return train, test
 
 
 if __name__ == "__main__":
-    create_dataloaders({"batch_size":32, "classes":CIFAR_CLASSES})
-    print([sum([int(i.split(".")[0]) for i in os.listdir("data/cifar10/cifar_10_segmented_train/" + cls)]) for cls in CIFAR_CLASSES])
-    print([sum([int(i.split(".")[0]) for i in os.listdir("data/cifar10/cifar_10_segmented_test/" + cls)]) for cls in CIFAR_CLASSES])
+    a,b = create_dataloaders(**{"batch_size":1, "classes":CIFAR_CLASSES})
+    print(next(iter(a)))
