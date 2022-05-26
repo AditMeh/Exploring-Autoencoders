@@ -77,6 +77,7 @@ def create_dataloaders(batch_size, classes):
     if not os.path.exists(os.path.join("data", "cifar10")):
         trainloader, testloader = get_pytorch_dataloaders()
         save_dataset(trainloader, testloader)
+        
     # insert logic for creating the dataloaders
     train = torch.utils.data.DataLoader(
         CIFARDataset("cifar_10_segmented_train",

@@ -39,7 +39,7 @@ class CNNAutoencoder(nn.Module):
 class CNNEncoder(nn.Module):
     def __init__(self, sizes):
         super().__init__()
-        self.out_seq = nn.Sequential(*[PoolingDownsampleBlock(size_in, size_out) for size_in, size_out
+        self.out_seq = nn.Sequential(*[DownsampleBlock(size_in, size_out) for size_in, size_out
                                        in zip(sizes[0:-1], sizes[1:])])
 
     def forward(self, x):
@@ -52,11 +52,11 @@ class CNNDecoder(nn.Module):
         super().__init__()
         sizes = list(reversed(sizes))
         sizes_minus_last = sizes[0:-1]
-        self.in_seq = nn.Sequential(*[UnPoolingUpsampleBlock(size_in, size_out, "relu") for size_in, size_out
+        self.in_seq = nn.Sequential(*[UpsampleBlock(size_in, size_out, "relu") for size_in, size_out
                                       in zip(sizes_minus_last[0:-1], sizes_minus_last[1:])])
 
-        self.last = UnPoolingUpsampleBlock(
-            sizes[-2], sizes[-1], activation="relu")
+        self.last = UpsampleBlock(
+            sizes[-2], sizes[-1], activation="sigmoid")
 
     def forward(self, x):
         x = self.in_seq(x)
@@ -69,11 +69,14 @@ class DownsampleBlock(nn.Module):
         super().__init__()
         # Modify this to create new conv blocks
         # Eg: Throw in pooling, throw in residual connections ... whatever you want
-        self.conv_1 = nn.Conv2d(size_in, size_out, 3, padding="valid")
+        self.conv_1 = nn.Conv2d(
+            size_in, size_out, kernel_size=3, stride=2, padding=1)
+        self.bn_1 = nn.BatchNorm2d(size_out)
         self.act = nn.ReLU()
 
     def forward(self, x):
         x = self.conv_1(x)
+        x = self.bn_1(x)
         return self.act(x)
 
 
@@ -82,47 +85,18 @@ class UpsampleBlock(nn.Module):
         super().__init__()
         # Modify this to create new transpose conv blocks
         # Eg: Throw in dropout, throw in batchnorm ... whatvever you want
-        self.up_conv_1 = nn.ConvTranspose2d(size_in, size_out, 3)
+        self.up_conv_1 = nn.ConvTranspose2d(
+            size_in, size_out, kernel_size=3, stride=2, padding=1, output_padding=1)
         activations = nn.ModuleDict([
             ["relu", nn.ReLU()],
             ["sigmoid", nn.Sigmoid()],
             ["tanh", nn.Tanh()]
         ])
+        self.bn_1 = nn.BatchNorm2d(size_out)
+
         self.act = activations[activation]
 
     def forward(self, x):
         x = self.up_conv_1(x)
-        return self.act(x)
-
-class PoolingDownsampleBlock(nn.Module):
-    def __init__(self, size_in, size_out):
-        super().__init__()
-        # Modify this to create new conv blocks
-        # Eg: Throw in pooling, throw in residual connections ... whatever you want
-        self.conv_1 = nn.Conv2d(size_in, size_out, 3, padding="valid")
-        self.pool = nn.Conv2d(size_out, size_out, 3, padding="valid")
-        #self.pool = nn.MaxPool2d(3, 1)
-        self.act = nn.ReLU()
-    def forward(self, x):
-        x = self.conv_1(x)
-        x = self.pool(x)
-        return self.act(x)
-
-class UnPoolingUpsampleBlock(nn.Module):
-    def __init__(self, size_in, size_out, activation):
-        super().__init__()
-        # Modify this to create new transpose conv blocks
-        # Eg: Throw in dropout, throw in batchnorm ... whatvever you want
-        self.up_conv_1 = nn.ConvTranspose2d(size_in, size_out, 3)
-        self.up_conv_2 = nn.ConvTranspose2d(size_out, size_out, 3)
-
-        activations = nn.ModuleDict([
-            ["relu", nn.ReLU()],
-            ["sigmoid", nn.Sigmoid()],
-            ["tanh", nn.Tanh()]
-        ])
-        self.act = activations[activation]    
-    def forward(self, x):
-        x = self.up_conv_1(x)
-        x = self.up_conv_2(x)
+        x = self.bn_1(x)
         return self.act(x)

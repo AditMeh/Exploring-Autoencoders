@@ -41,4 +41,5 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
         axarr[i, 3].imshow(torch.permute(
             torch.squeeze(autoencoder(torch.unsqueeze(x[2*i + 1], axis=0))[1]), 
             (1, 2, 0)).detach().cpu().numpy())
-    plt.show()
+    plt.savefig('foo.png')
+

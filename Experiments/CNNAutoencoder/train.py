@@ -39,7 +39,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
 
     for epoch in range(1, epochs + 1):
 
-        model.train()
+        model.train()   
         for x, _ in tqdm.tqdm(train_loader):
             x = x.to(device=device)
             photometric_loss = compute_forward_pass(

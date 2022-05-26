@@ -1,22 +1,21 @@
 {
     "training_params": {
         "batch_size": 32,
-        "epochs": 100,
-        "lr": 0.001
+        "epochs": 60,
+        "lr": 0.0001
     },
     "architecture_params": {
-        "sizes": [3, 8, 32, 64, 128],
-        "h": 32,
-        "w": 32,
+        "sizes": [3, 64, 128, 256, 512],
+        "h": 88,
+        "w": 88,
         "num_dense_layers": 2,
         "fcnn": false
 
     },
     "dataset_params": {
-        "name": "cifar",
+        "name": "animefacedataset",
         "hyperparams": {
-            "batch_size" : 32,
-            "classes": ["frog"]
+            "batch_size" : 32
         }
     }
 }
