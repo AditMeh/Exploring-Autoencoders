@@ -5,7 +5,7 @@
         "lr": 0.0001
     },
     "architecture_params": {
-        "sizes": [3, 64, 128, 256, 512],
+        "sizes": [3, 32, 64, 128, 256, 512, 784],
         "h": 88,
         "w": 88,
         "num_dense_layers": 2,
