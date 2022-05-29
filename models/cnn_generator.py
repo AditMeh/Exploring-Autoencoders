@@ -49,8 +49,7 @@ class CNNEncoder(nn.Module):
         modules_list = []
         self.output_padding_flags = []
         for size_in, size_out in zip(sizes[0:-1], sizes[1:]):
-            modules_list.append(
-                nn.Conv2d(size_in, size_out, kernel_size=3, stride=2, padding=1))
+            modules_list.append(DownsampleBlock(size_in, size_out))
 
             if (img_dim % 2) == 0:  # even img dim
                 self.output_padding_flags.append(1)
