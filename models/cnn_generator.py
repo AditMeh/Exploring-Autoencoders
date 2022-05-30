@@ -2,13 +2,51 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 import numpy as np
-from models.dense_generator import DenseEncoder
+from models.dense_generator import DenseEncoder, FeedforwardLayer
 import math
 
 
 def conv_func(p, d, k, s, h):
-    return math.floor(((h + 2*p - d * (k-1) - 1)/s) + 1)\
+    return math.floor(((h + 2*p - d * (k-1) - 1)/s) + 1)
 
+
+class CNNVae(nn.Module):
+    def __init__(self, sizes, h, w, num_dense_layers, z_dim):
+        super().__init__()
+        self.encoder = CNNEncoder(sizes, h)
+        self.unflattened_latent_dim = (self.encoder(
+            torch.ones((1, sizes[0], w, h))).shape)[1:]
+        encoder_input_size = np.product(self.unflattened_latent_dim)
+
+        self.latent_mlp = DenseEncoder(
+            [encoder_input_size for _ in range(num_dense_layers)])
+
+        self.mu = FeedforwardLayer(encoder_input_size, z_dim)
+        self.logvar = FeedforwardLayer(encoder_input_size, z_dim)
+        self.unproject = FeedforwardLayer(z_dim, encoder_input_size)
+
+        self.decoder = CNNDecoder(sizes, self.encoder.output_padding_flags)
+
+    def forward(self, x):
+        pre_latent = self.encoder(x)
+        pre_latent = torch.flatten(pre_latent, start_dim=1)
+        pre_latent = self.latent_mlp(pre_latent)
+
+        mu, logvar = self.mu(pre_latent), self.logvar(pre_latent)
+
+        z = self.reparameterize(mu, logvar)
+
+        unproject = self.unproject(z)
+        reconstruction = self.decoder(torch.reshape(
+            unproject, [unproject.shape[0], *self.unflattened_latent_dim]))
+
+        return z, mu, logvar, reconstruction
+
+    def reparameterize(self, mean, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+
+        return eps * std + mean
 
 
 class CNNAutoencoder(nn.Module):
@@ -32,10 +70,10 @@ class CNNAutoencoder(nn.Module):
 
             latent = torch.flatten(latent, start_dim=1)
 
-            dense_encoder = self.latent_mlp(latent)
+            latent = self.latent_mlp(latent)
 
             reconstruction = self.decoder(torch.reshape(
-                dense_encoder, [dense_encoder.shape[0], *self.unflattened_latent_dim]))
+                latent, [latent.shape[0], *self.unflattened_latent_dim]))
         else:
             reconstruction = self.decoder(latent)
 
@@ -136,6 +174,7 @@ class UpsampleBlock(nn.Module):
         x = self.bn_1(x)
         return self.act(x)
 
+
 if __name__ == "__main__":
     for cap in range(3, 8, 1):
         for range_cap in range(5, 15, 1):
@@ -155,4 +194,3 @@ if __name__ == "__main__":
                 print("----------------")
 
                 assert model(a)[1].shape == a.shape
-

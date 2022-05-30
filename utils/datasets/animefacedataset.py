@@ -49,3 +49,4 @@ if __name__ == "__main__":
         assert ((i[0].shape[2] == 88) and (i[0].shape[3] == 88))
     for i in b:
         assert ((i[0].shape[2] == 88) and (i[0].shape[3] == 88))
+    print(len(a), len(b))
