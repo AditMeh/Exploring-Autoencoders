@@ -1,0 +1,20 @@
+{
+    "training_params": {
+        "batch_size": 32,
+        "epochs": 60,
+        "lr": 0.0001
+    },
+    "architecture_params": {
+        "sizes": [3, 32, 64, 128, 256, 512, 784],
+        "h": 88,
+        "w": 88,
+        "num_dense_layers": 2,
+        "z_dim": 128
+    },
+    "dataset_params": {
+        "name": "animefacedataset",
+        "hyperparams": {
+            "batch_size" : 32
+        }
+    }
+}
