@@ -1,10 +1,8 @@
 """
-This experiment is for the contrastive autoencoderr
+This experiment is for the contrastive autoencoder
 """
 
-from operator import mod
 import os
-from turtle import clear
 import torch
 import tqdm
 import torch.nn.functional as F

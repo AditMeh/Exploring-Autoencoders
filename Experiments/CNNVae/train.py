@@ -104,4 +104,4 @@ def run_experiment(fp, training_params, architecture_params, dataset_params, dat
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,
                        device, **(training_params))
-    torch.save(best_model, os.path.join(fp, "weights/cnn_ae.pt"))
+    torch.save(best_model, os.path.join(fp, "weights/cnn_vae.pt"))
