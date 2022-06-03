@@ -1,6 +1,6 @@
 import os
 import torch
-from models.cnn_generator import CNNAutoencoder
+from models.cnn_generator import CNNVae
 from models.dense_generator import DenseAutoEncoder
 import numpy as np
 
@@ -15,10 +15,10 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
               else torch.device('cpu'))
 
     # Create encoder
-    autoencoder = CNNAutoencoder(**architecture_params).to(device=device)
+    autoencoder = CNNVae(**architecture_params).to(device=device)
     if resume:
         autoencoder.load_state_dict(torch.load(
-            os.path.join(fp, "weights/cnn_ae.pt")))
+            os.path.join(fp, "weights/cnn_vae.pt")))
 
     # Autoencoder architecture
     print(autoencoder)
@@ -40,13 +40,13 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
         axarr[i, 0].imshow(torch.permute(
             x[2*i], (1, 2, 0)).detach().cpu().numpy())
         axarr[i, 1].imshow(torch.permute(
-            torch.squeeze(autoencoder(torch.unsqueeze(x[2*i], axis=0))[1]),
+            torch.squeeze(autoencoder(torch.unsqueeze(x[2*i], axis=0))[3]),
             (1, 2, 0)).detach().cpu().numpy())
 
         axarr[i, 2].imshow(torch.permute(
             x[2*i + 1], (1, 2, 0)).detach().cpu().numpy())
         axarr[i, 3].imshow(torch.permute(
-            torch.squeeze(autoencoder(torch.unsqueeze(x[2*i + 1], axis=0))[1]),
+            torch.squeeze(autoencoder(torch.unsqueeze(x[2*i + 1], axis=0))[3]),
             (1, 2, 0)).detach().cpu().numpy())
 
     linear_interpolate(autoencoder, train_loader, device)
@@ -60,14 +60,14 @@ def linear_interpolate(autoencoder, train_loader, device):
     
     x_1 = torch.unsqueeze(dim=0, input=x[0])
     x_2 = torch.unsqueeze(dim=0, input=x[1])
-    latent_1, _ = autoencoder(x_1)
-    latent_2, _ = autoencoder(x_2)
+    latent_1, _, _, _ = autoencoder(x_1)
+    latent_2, _, _, _ = autoencoder(x_2)
 
     latents = torch.stack(
         [latent_1 + (latent_2 - latent_1)*t for t in torch.linspace(0, 1, NUM_SAMPLES)])
 
-    reconstructions = autoencoder.decoder(torch.reshape(
-            latents, [latents.shape[0], *autoencoder.unflattened_latent_dim]))
+    print(latents.shape)
+    reconstructions = autoencoder.reconstruct_latent(latents)
 
     save_images = []
     for img in reconstructions:

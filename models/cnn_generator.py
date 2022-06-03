@@ -13,7 +13,7 @@ def conv_func(p, d, k, s, h):
 class CNNVae(nn.Module):
     def __init__(self, sizes, h, w, num_dense_layers, z_dim):
         super().__init__()
-        self.encoder = CNNEncoder(sizes, h)
+        self.encoder = CNNEncoder(sizes, w, h)
         self.unflattened_latent_dim = (self.encoder(
             torch.ones((1, sizes[0], w, h))).shape)[1:]
         encoder_input_size = np.product(self.unflattened_latent_dim)
@@ -48,12 +48,18 @@ class CNNVae(nn.Module):
 
         return eps * std + mean
 
+    def reconstruct_latent(self, z):
+        unproject = self.unproject(z)
+        reconstruction = self.decoder(torch.reshape(
+            unproject, [unproject.shape[0], *self.unflattened_latent_dim]))
+        return reconstruction
+
 
 class CNNAutoencoder(nn.Module):
     def __init__(self, sizes, h, w, num_dense_layers, fcnn):
         super().__init__()
         self.fcnn = fcnn
-        self.encoder = CNNEncoder(sizes, h)
+        self.encoder = CNNEncoder(sizes, w, h)
         if not fcnn:
             self.unflattened_latent_dim = (self.encoder(
                 torch.ones((1, sizes[0], w, h))).shape)[1:]
@@ -81,7 +87,7 @@ class CNNAutoencoder(nn.Module):
 
 
 class CNNEncoder(nn.Module):
-    def __init__(self, sizes, img_dim):
+    def __init__(self, sizes, w, h):
         super().__init__()
 
         modules_list = []
@@ -89,12 +95,10 @@ class CNNEncoder(nn.Module):
         for size_in, size_out in zip(sizes[0:-1], sizes[1:]):
             modules_list.append(DownsampleBlock(size_in, size_out))
 
-            if (img_dim % 2) == 0:  # even img dim
-                self.output_padding_flags.append(1)
-            else:
-                self.output_padding_flags.append(0)
+            self.output_padding_flags.append(
+                (int(w % 2 == 0), int(h % 2 == 0)))
 
-            img_dim = conv_func(1, 1, 3, 2, img_dim)
+            w, h = conv_func(1, 1, 3, 2, w), conv_func(1, 1, 3, 2, h)
 
         self.out_seq = nn.Sequential(*modules_list)
 
@@ -109,12 +113,8 @@ class CNNDecoder(nn.Module):
 
         self.in_seq = self.create_sequential(sizes, padding_flags)
 
-        if padding_flags[0]:
-            self.last = UpsampleBlock(
-                sizes[1], sizes[0], 1, activation="sigmoid")
-        else:
-            self.last = UpsampleBlock(
-                sizes[1], sizes[0], 0, activation="sigmoid")
+        self.last = UpsampleBlock(
+            sizes[1], sizes[0], padding_flags[-1], activation="sigmoid")
 
     def forward(self, x):
         x = self.in_seq(x)
@@ -130,10 +130,8 @@ class CNNDecoder(nn.Module):
 
         for i, size_tup in enumerate(zip(sizes_minus_last[0:-1], sizes_minus_last[1:])):
             size_in, size_out = size_tup
-            if padding_flags[i]:
-                module_list.append(UpsampleBlock(size_in, size_out, 1, "relu"))
-            else:
-                module_list.append(UpsampleBlock(size_in, size_out, 0, "relu"))
+            module_list.append(UpsampleBlock(
+                size_in, size_out, padding_flags[i], "relu"))
         return nn.Sequential(*module_list)
 
 
