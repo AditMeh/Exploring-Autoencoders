@@ -11,7 +11,7 @@ def conv_func(p, d, k, s, h):
 
 
 class CNNVae(nn.Module):
-    def __init__(self, sizes, h, w, num_dense_layers, z_dim):
+    def __init__(self, sizes, w, h, num_dense_layers, z_dim):
         super().__init__()
         self.encoder = CNNEncoder(sizes, w, h)
         self.unflattened_latent_dim = (self.encoder(
@@ -56,7 +56,7 @@ class CNNVae(nn.Module):
 
 
 class CNNAutoencoder(nn.Module):
-    def __init__(self, sizes, h, w, num_dense_layers, fcnn):
+    def __init__(self, sizes, w, h, num_dense_layers, fcnn):
         super().__init__()
         self.fcnn = fcnn
         self.encoder = CNNEncoder(sizes, w, h)
@@ -171,24 +171,3 @@ class UpsampleBlock(nn.Module):
         x = self.up_conv_1(x)
         x = self.bn_1(x)
         return self.act(x)
-
-
-if __name__ == "__main__":
-    for cap in range(3, 8, 1):
-        for range_cap in range(5, 15, 1):
-            for img_size in range(70, 150, range_cap):
-
-                model = CNNAutoencoder(
-                    [3 for _ in range(cap)],
-                    img_size,
-                    img_size,
-                    2,
-                    fcnn=True
-                )
-
-                a = torch.ones((1, 3, img_size, img_size))
-                print(a.shape)
-                print(model(a)[1].shape)
-                print("----------------")
-
-                assert model(a)[1].shape == a.shape

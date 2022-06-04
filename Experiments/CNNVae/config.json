@@ -6,15 +6,16 @@
     },
     "architecture_params": {
         "sizes": [3, 32, 64, 128, 256, 512, 784],
-        "h": 88,
-        "w": 88,
+        "w": 178,
+        "h": 218,
         "num_dense_layers": 2,
         "z_dim": 128
     },
     "dataset_params": {
-        "name": "animefacedataset",
+        "name": "celeba",
         "hyperparams": {
-            "batch_size" : 32
+            "batch_size" : 32,
+            "split": 0.80
         }
     }
 }

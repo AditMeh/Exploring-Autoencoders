@@ -1,6 +1,10 @@
 # Project Specific
 test.py
 TODO.md
+data/*
+!data/.placeholder
+foo.png
+test.gif
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
