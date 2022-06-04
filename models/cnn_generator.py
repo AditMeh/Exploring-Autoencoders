@@ -114,7 +114,7 @@ class CNNDecoder(nn.Module):
         self.in_seq = self.create_sequential(sizes, padding_flags)
 
         self.last = UpsampleBlock(
-            sizes[1], sizes[0], padding_flags[-1], activation="sigmoid")
+            sizes[1], sizes[0], padding_flags[0], activation="sigmoid")
 
     def forward(self, x):
         x = self.in_seq(x)
