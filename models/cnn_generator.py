@@ -11,11 +11,11 @@ def conv_func(p, d, k, s, h):
 
 
 class CNNVae(nn.Module):
-    def __init__(self, sizes, w, h, num_dense_layers, z_dim):
+    def __init__(self, sizes, h, w, num_dense_layers, z_dim):
         super().__init__()
-        self.encoder = CNNEncoder(sizes, w, h)
+        self.encoder = CNNEncoder(sizes, h, w)
         self.unflattened_latent_dim = (self.encoder(
-            torch.ones((1, sizes[0], w, h))).shape)[1:]
+            torch.ones((1, sizes[0], h, w))).shape)[1:]
         encoder_input_size = np.product(self.unflattened_latent_dim)
 
         self.latent_mlp = DenseEncoder(
@@ -56,13 +56,13 @@ class CNNVae(nn.Module):
 
 
 class CNNAutoencoder(nn.Module):
-    def __init__(self, sizes, w, h, num_dense_layers, fcnn):
+    def __init__(self, sizes, h, w, num_dense_layers, fcnn):
         super().__init__()
         self.fcnn = fcnn
-        self.encoder = CNNEncoder(sizes, w, h)
+        self.encoder = CNNEncoder(sizes, h, w)
         if not fcnn:
             self.unflattened_latent_dim = (self.encoder(
-                torch.ones((1, sizes[0], w, h))).shape)[1:]
+                torch.ones((1, sizes[0], h, w))).shape)[1:]
             encoder_input_size = np.product(self.unflattened_latent_dim)
 
             self.latent_mlp = DenseEncoder(
@@ -87,7 +87,7 @@ class CNNAutoencoder(nn.Module):
 
 
 class CNNEncoder(nn.Module):
-    def __init__(self, sizes, w, h):
+    def __init__(self, sizes, h, w):
         super().__init__()
 
         modules_list = []
@@ -96,9 +96,9 @@ class CNNEncoder(nn.Module):
             modules_list.append(DownsampleBlock(size_in, size_out))
 
             self.output_padding_flags.append(
-                (int(w % 2 == 0), int(h % 2 == 0)))
+                (int(h % 2 == 0), int(w % 2 == 0)))
 
-            w, h = conv_func(1, 1, 3, 2, w), conv_func(1, 1, 3, 2, h)
+            h, w = conv_func(1, 1, 3, 2, h), conv_func(1, 1, 3, 2, w)
 
         self.out_seq = nn.Sequential(*modules_list)
 

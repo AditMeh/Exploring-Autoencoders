@@ -6,8 +6,8 @@
     },
     "architecture_params": {
         "sizes": [3, 32, 64, 128, 256, 512, 784],
-        "w": 178,
         "h": 218,
+        "w": 178,
         "num_dense_layers": 2,
         "z_dim": 128
     },
