@@ -14,7 +14,7 @@ from torch.nn import MSELoss
 from models.cnn_generator import CNNVae
 from utils.TorchUtils.training.StatsTracker import StatsTracker
 
-def ELBO(x, mu, logvar, reconstruction):
+def ELBO(x, mu, logvar, reconstruction, kld_weight):
     # = -log(sigma) + 1/2 (sigma^2 + mu^2) - 1/2
 
     # Gaussian log likelihood is proportional to -ve MSE,
@@ -28,11 +28,11 @@ def ELBO(x, mu, logvar, reconstruction):
 
     # ELBO is defined as -KL divergence + log likelihood
     # Therefore since we want to maximize the ELBO, we equivalently need to minimize KLD - log likelihood
-    return KLD_scalar - gaussian_log_likelihood
+    return kld_weight*KLD_scalar - gaussian_log_likelihood
 
-def compute_forward_pass(model, x, optimizer, criterion, update):
+def compute_forward_pass(model, x, optimizer, criterion, kld_weight, update):
     latent, mean, logvar, reconstruction = model(x)
-    VAE_loss = criterion(x, mean, logvar, reconstruction)
+    VAE_loss = criterion(x, mean, logvar, reconstruction, kld_weight)
     if update:
         model.zero_grad()
         VAE_loss.backward()
@@ -40,7 +40,7 @@ def compute_forward_pass(model, x, optimizer, criterion, update):
     return VAE_loss
 
 
-def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
+def train(model, train_loader, val_loader, device, epochs, lr, batch_size, kld_weight):
     # Initialize autoencoder
 
     optimizer = Adam(params=model.parameters(), lr=lr)
@@ -57,7 +57,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
         for x in tqdm.tqdm(train_loader):
             x = x.to(device=device)
             photometric_loss = compute_forward_pass(
-                model, x, optimizer, criterion, update=True)
+                model, x, optimizer, criterion, kld_weight, update=True)
             statsTracker.update_curr_losses(photometric_loss.item(), None)
 
         with torch.no_grad():
@@ -65,7 +65,7 @@ def train(model, train_loader, val_loader, device, epochs, lr, batch_size):
             for x in tqdm.tqdm(val_loader):
                 x = x.to(device=device)
                 photometric_loss_val = compute_forward_pass(
-                    model, x, optimizer, criterion, update=False)
+                    model, x, optimizer, criterion, kld_weight, update=False)
 
                 statsTracker.update_curr_losses(
                     None, photometric_loss_val.item())
@@ -99,7 +99,7 @@ def run_experiment(fp, training_params, architecture_params, dataset_params, dat
 
     if resume:
         autoencoder.load_state_dict(torch.load(
-            os.path.join(fp, "weights/cnn_vae.pt")))
+        os.path.join(fp, f'weights/cnn_{dataset_params["name"]}_vae.pt')))
 
     print(autoencoder)
     best_model = train(autoencoder, train_loader, val_loader,

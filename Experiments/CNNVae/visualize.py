@@ -18,7 +18,7 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
     autoencoder = CNNVae(**architecture_params).to(device=device)
     if resume:
         autoencoder.load_state_dict(torch.load(
-            os.path.join(fp, "weights/cnn_vae.pt")))
+            os.path.join(fp, f'weights/cnn_{dataloader_params["name"]}_vae.pt')))
 
     # Autoencoder architecture
     print(autoencoder)
@@ -27,7 +27,7 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
         **dataloader_params["hyperparams"])
 
     # Sample random datapoint
-    x, _ = next(iter(train_loader))
+    x = next(iter(train_loader))
     x = x.to(device=device)
     # subplot(r,c) provide the no. of rows and columns
     f, axarr = plt.subplots(2, 4)
@@ -55,9 +55,9 @@ def visualize(fp, architecture_params, dataloader_params, dataloader_func, resum
 
 
 def linear_interpolate(autoencoder, train_loader, device):
-    x, _ = next(iter(train_loader))
+    x = next(iter(train_loader))
     x = x.to(device=device)
-    
+
     x_1 = torch.unsqueeze(dim=0, input=x[0])
     x_2 = torch.unsqueeze(dim=0, input=x[1])
     latent_1, _, _, _ = autoencoder(x_1)
