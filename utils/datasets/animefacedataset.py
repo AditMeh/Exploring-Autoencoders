@@ -8,15 +8,12 @@ from PIL import Image
 import torchvision
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
+import tqdm
 
 
 class AnimeFaceDataset(torch.utils.data.Dataset):
-    def __init__(self):
-
-        self.images = []
-        base_path = "data/animefacedataset/images"
-        self.images += [(os.path.join(base_path, pth), 0)
-                        for pth in os.listdir(os.path.join(base_path))]
+    def __init__(self, image_fps):
+        self.images = image_fps
         self.transforms = transforms.Compose(
             [transforms.ToTensor(), transforms.Resize((88, 88))])
 
@@ -24,29 +21,32 @@ class AnimeFaceDataset(torch.utils.data.Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        im = Image.open(self.images[idx][0])
-        return self.transforms((im)), self.images[idx][1]
+        im = Image.open(self.images[idx])
+        return self.transforms((im))
 
 
-def create_dataloaders(batch_size):
+def create_dataloaders(batch_size, split):
+    base_path = "data/animefacedataset/images"
+    fps = [os.path.join(base_path, pth)
+           for pth in os.listdir(os.path.join(base_path))]
+    split = int(len(fps) * split)
 
     # insert logic for creating the dataloaders
     train = torch.utils.data.DataLoader(
-        AnimeFaceDataset(),
+        AnimeFaceDataset(fps[0:split]),
         batch_size=batch_size, shuffle=True)
 
     test = torch.utils.data.DataLoader(
-        AnimeFaceDataset(),
+        AnimeFaceDataset(fps[split:]),
         batch_size=batch_size, shuffle=True)
     return train, test
 
 
 if __name__ == "__main__":
-    a, b = create_dataloaders(**{"batch_size": 1})
-    min_a = (np.inf, np.inf)
+    a, b = create_dataloaders(**{"batch_size": 1, "split": 0.80})
 
-    for i in a:
-        assert ((i[0].shape[2] == 88) and (i[0].shape[3] == 88))
-    for i in b:
-        assert ((i[0].shape[2] == 88) and (i[0].shape[3] == 88))
+    for i in tqdm.tqdm(a):
+        assert ((i.shape[2] == 88) and (i.shape[3] == 88))
+    for i in tqdm.tqdm(b):
+        assert ((i.shape[2] == 88) and (i.shape[3] == 88))
     print(len(a), len(b))

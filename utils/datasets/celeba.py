@@ -43,7 +43,6 @@ def create_dataloaders(batch_size, split):
 
 if __name__ == "__main__":
     a, b = create_dataloaders(**{"batch_size": 1, "split": 0.70})
-    min_a = (np.inf, np.inf)
     for i in tqdm.tqdm(a):
         assert ((i.shape[2] == 218) and (i.shape[3] == 178))
     for i in tqdm.tqdm(b):
