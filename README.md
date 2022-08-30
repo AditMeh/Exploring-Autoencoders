@@ -50,3 +50,8 @@ Here is a visualization. For each cell with an image, I am interpolating between
 ![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/test.gif)
 
 
+### CNN VAE
+
+I've also trained a VAE using a CNN encoder and decoder, where the decoder uses transposed convolutions. Here's a visualziation
+
+![w2w1](https://github.com/AditMeh/Exploring-Autoencoders/blob/main/images/celeba_small.gif)
