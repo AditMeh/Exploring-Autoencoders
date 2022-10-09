@@ -1,13 +1,22 @@
 # Exploring-Autoencoders
 Learning about auto encoders and latent spaces
 
-Requirements:
+## Requirements:
 - Pytorch (torchvision)
 - matplotlib
 
 
+## How to use:
+The models are all in the Experiments folder, to run the training and/or visualization for any one of them just do:
 
-## So far:
+`python3 main.py <experiment name>`
+
+You can include `-v` to save a visualization of that model to the disk and `-r` to start from the previously saved model weights.
+
+If you want to edit one of the experiments, just change the config.json of that given model. 
+
+---
+## Visualizations
 
 ### Trivial solution for MNIST reconstruction:
 
